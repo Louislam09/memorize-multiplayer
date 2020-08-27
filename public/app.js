@@ -41,6 +41,9 @@ let myTurn = false;
 let currectPlayer = '';
 let playerNumber = 0;
 
+
+
+
 socket.emit('user-name', userName);
 
 socket.on('players-info', informations => {
@@ -290,3 +293,4 @@ backHomeButton.addEventListener('click',()=>{
   let origin = window.location.origin;
   window.open(`${origin}`,'_parent');
 })
+

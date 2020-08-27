@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="images/question.png" type="image/png">
+    <link rel="shortcut icon" href="images/icons/icon.png" type="image/png">
     <title>LOBBY</title>
+    <link rel="manifest" href="./manifest.webmanifest">
     <link rel="stylesheet" href="lobby.css">
 </head>
 <body>
@@ -17,5 +18,20 @@
     </div>
     <span class="autor">Made with ❤️ by Lam09 </span>
 
+    <script>
+        window.addEventListener('load', () => {
+            registerSW();
+        });
+
+        async function registerSW() {
+            if ("serviceWorker" in navigator) {
+                try {
+                    await navigator.serviceWorker.register("./sw.js");
+                } catch (error) {
+                    console.log("ServiceWorker registration failed")
+                }
+            }
+        }
+    </script>
 </body>
 </html>
