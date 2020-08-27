@@ -49,3 +49,12 @@ a:hover{
     background: #2cdac380;
     transform: translateX(10px);
 }
+.autor {
+	position: fixed;
+	bottom: 1%;
+	right: 1%;
+	background-color: rgba(255, 0, 21, 0.678);
+	color: white;
+	padding: 10px;
+	font-weight: bolder;
+}

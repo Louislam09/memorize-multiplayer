@@ -28,7 +28,7 @@ let cards = [];
 let cardsToVerify = [];
 let cardsToSent = [];
 
-let userName = prompt('what your name?');
+let userName = prompt('Escribe Tu Nombre: ');
 let playAgainMessage = false;
 
 let enemyName;
@@ -170,11 +170,11 @@ function areEqual(array) {
     isTurnDiv.classList.add('win');
     
     if (userPoint > enemyPoint) {
-        isTurnDiv.innerText = `The Winner is: ${userName}`;
-        winnerDiv.innerText = `The Winner is: ${userName}`;
+        isTurnDiv.innerText = `El Ganador es: ${userName}`;
+        winnerDiv.innerText = `El Ganador es: ${userName}`;
       }else if (userPoint < enemyPoint) {
-        isTurnDiv.innerText = `The Winner is: ${enemyName}`;
-        winnerDiv.innerText = `The Winner is: ${enemyName}`;
+        isTurnDiv.innerText = `El Ganador es: ${enemyName}`;
+        winnerDiv.innerText = `El Ganador es: ${enemyName}`;
       }else {
         isTurnDiv.innerText = `Empate!`;
         winnerDiv.innerText = `Empate!`;
