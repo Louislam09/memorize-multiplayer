@@ -10,7 +10,7 @@ let backHomeButton = gameEnd.querySelector('.back__home');
 let winnerDiv = gameEnd.querySelector('h1');
 
 // const socket = io.connect('http://192.168.43.10:3000/');
-const socket = io();
+// const socket = io();
 
 let colors = [
   "start-6",
@@ -31,48 +31,17 @@ let cardsToSent = [];
 let userName = prompt('Escribe Tu Nombre: ');
 let playAgainMessage = false;
 
-let enemyName;
+let enemyName = 'Computadora';
 
 let userPoint = 0,
   enemyPoint = 0;
 
 let myTurn = false;
+let computerCardToOpen = 0;
+let computerTempCard;
 
 let currectPlayer = '';
 let playerNumber = 0;
-
-
-
-
-socket.emit('user-name', userName);
-
-socket.on('players-info', informations => {
-  for(const i in informations){
-    if(informations[i].num === -1){
-      isTurnDiv.innerText = 'Sorry, the server is full';
-
-    } else {
-      playerNumber = parseInt(informations[i].num);
-      
-      if(informations[playerNumber].userName !== userName){
-        enemyName = informations[playerNumber].userName;
-        break;
-      }
-
-      if(playerNumber === 0 && informations[playerNumber].userName === userName){
-        myTurn = true;
-      }
-    }
-  }
-
-  if(userName !== undefined && enemyName !== undefined) isTurn();
-  console.log(`UserName: ${userName}  enemyName: ${enemyName}`)
-});
-
-socket.on('colors', data => {
-  createBoard(data);
-
-})
 
 function resetGame() {
   gameScreen.innerHTML = '';
@@ -82,7 +51,7 @@ function resetGame() {
   
   cards = [];
   gameScreen.innerHTML = '';
-  
+  computerCardToOpen = 0;
   userPoint = 0;
   enemyPoint = 0;
   player1Div.innerText = `${userName}: ${userPoint}`;
@@ -91,21 +60,26 @@ function resetGame() {
   isTurn();
 }
 
-function createBoard(data){
-  resetGame();
-  const { colors1, colors2 } = data;
-  for (let i = 0; i < numberOfCard; i++) {
-    let card = document.createElement("div");
-    card.classList.add("card");
-    card.id = i;
-    if (i <= 7) card.classList.add(colors1[i]);
+createBoard();
 
-    if (i > 7) card.classList.add(colors2[i - 8]);
-    card.classList.add("hide");
+function createBoard(){
+    resetGame();
 
-    cards.push(card);
-    gameScreen.appendChild(card);
-  }
+    let colors1 = colors.sort(() => 0.5 - Math.random());
+    let colors2 = [...colors].sort(() => 0.5 - Math.random());
+
+    for (let i = 0; i < numberOfCard; i++) {
+        let card = document.createElement("div");
+        card.classList.add("card");
+        card.id = i;
+        if (i <= 7) card.classList.add(colors1[i]);
+
+        if (i > 7) card.classList.add(colors2[i - 8]);
+        card.classList.add("hide");
+
+        cards.push(card);
+        gameScreen.appendChild(card);
+    }
 
     cards.forEach((card) => {
         card.addEventListener("click", cardClicked);
@@ -113,45 +87,68 @@ function createBoard(data){
 }
 
 function cardClicked(event) {
-  if(myTurn){
+    if(myTurn){
     let elementClicked = event.target;
+    computerTempCard = elementClicked;
+    if( elementClicked.classList.contains('hide') ){
+        elementClicked.classList.remove("hide");
+        cardsToVerify.push(elementClicked);
+        cardsToSent.push(elementClicked.id);
 
-    if(elementClicked.classList.contains('hide')){
-      elementClicked.classList.remove("hide");
-      cardsToVerify.push(elementClicked);
-      cardsToSent.push(elementClicked.id);
-    
-      socket.emit('cardClicked', {
-        cardsToSent: cardsToSent
-      });
-    
-      if (cardsToVerify.length == 2) {
-          areEqual(cardsToVerify);
-      }
-      
-      socket.emit('canClick', { 
-        canClick: false
-       } );
+        if (cardsToVerify.length === 2) {
+            areEqual(cardsToVerify);
+        }
+
     } else {
-      alert('Esta carta ya esta revelada!\n presione otra!')
-      return;
+        alert('Esta Carta Ya Esta Revelada!\n Presione Otra!');
+        return;
     }
 
-  } else {
-    isTurnDiv.innerText = `No es tu turno!`;
-    isTurnDiv.classList.add('not-turn');
+    } else {
+        isTurnDiv.innerText = `No es tu turno!`;
+        isTurnDiv.classList.add('not-turn');
 
-    setTimeout(()=>{
-      isTurnDiv.classList.remove('not-turn')
-      if(myTurn) {
-        isTurnDiv.innerText = `Es turno de : ${userName}`;
-      }else{
-        isTurnDiv.innerText = `Es turno de : ${enemyName}`;
-      }
-    },2000)
+        setTimeout( () => {
+            isTurnDiv.classList.remove('not-turn');
 
-  }
-  
+            if(myTurn) {
+                isTurnDiv.innerText = `Es turno de : ${userName}`;
+            } else {
+                isTurnDiv.innerText = `Es turno de : ${enemyName}`;
+            }
+
+        },2000)
+    }   
+
+}
+
+function compuCardClicked(){
+    let chooseCard;
+    if(Math.random() < 0.4 && cardsToVerify[0]){
+        let cardEqual = cards.filter( card => 
+            card.classList[1] === computerTempCard.classList[1] &&
+            card.id !== computerTempCard.id
+        );
+
+        chooseCard = cardEqual[0];  
+        chooseCard.classList.remove("hide");
+    }else {
+        let cardsAvailable = cards.filter(card=> card.classList.contains('hide'));
+        chooseCard = randomFrom(cardsAvailable);
+        computerTempCard = chooseCard;
+        chooseCard.classList.remove("hide");
+    }
+
+    cardsToVerify.push(chooseCard);
+    cardsToSent.push(chooseCard.id);
+
+    if (cardsToVerify.length === 2) {
+        areEqual(cardsToVerify);
+    }
+}
+
+function randomFrom(array){
+    return array[Math.floor(Math.random() * array.length)];
 }
 
 function areEqual(array) {
@@ -175,10 +172,10 @@ function areEqual(array) {
     if (userPoint > enemyPoint) {
         isTurnDiv.innerText = `El Ganador es: ${userName}`;
         winnerDiv.innerText = `El Ganador es: ${userName}`;
-      }else if (userPoint < enemyPoint) {
+    }else if (userPoint < enemyPoint) {
         isTurnDiv.innerText = `El Ganador es: ${enemyName}`;
         winnerDiv.innerText = `El Ganador es: ${enemyName}`;
-      }else {
+    }else {
         isTurnDiv.innerText = `Empate!`;
         winnerDiv.innerText = `Empate!`;
     }
@@ -202,6 +199,27 @@ function isTurn() {
   } else {
     isTurnDiv.innerText = `Es turno de : ${enemyName}`;
     currectPlayer = enemyName;
+
+     computerCardToOpen = 2;
+
+    let timing = setInterval(() => {
+        if(computerCardToOpen !== 0 ){
+            if( !gameCompleted() ){
+                compuCardClicked();
+
+            } else {
+                clearInterval(timing);
+            }
+
+            setTimeout(() => {
+                if( computerCardToOpen === 1 && !myTurn) computerCardToOpen = 2;
+                computerCardToOpen--;
+            }, 600);
+
+        }else{
+            clearInterval(timing);
+        }
+    }, 1000);
   }
 }
 
@@ -242,54 +260,18 @@ function showElement(element,v = false) {
 }
 
 function hideElement(element,v = false) {
-  
   if(v){
     element.style.visibily= "hidden";
   }
     element.style.display = "none";
 }
 
-socket.on('clicked', (data) =>{
-    cardsToSent = data;
-
-    data.forEach(id=>{
-        cards[id].classList.remove('hide');
-    })
-
-    if(cardsToSent.length === 2){
-        cardsToSent[0] = cards[data[0]];
-        cardsToSent[1] = cards[data[1]];
-        areEqual(cardsToSent);
-    } 
-})
-
 playAgainButton.addEventListener('click', () => {
-  winnerDiv.innerText = `Esperando tu oponente...`;
-  socket.emit('play-again-confirmation',{
-    data: true,
-    alertName: userName
-  })
-
-  hideElement(playAgainButton,true);
-
+    hideElement(playAgainButton,true);
+    createBoard();
 })
 
-socket.on('acept-match', data => {
-  let message = `${data} Quiere juegar de nuevo!\n Presionar play Again para volver\n a jugar! `;
-  alert(message);
-});
-
-socket.on('oponent-disconneted', data => {
-  let { message } = data;
-  alert( message );
-});
-
-socket.on('oponent-connected', data => {
-  let { message } = data;
-  alert( message );
-});
-
-backHomeButton.addEventListener('click',()=>{
+backHomeButton.addEventListener('click',() => {
   let origin = window.location.origin;
   window.open(`${origin}`,'_parent');
 })

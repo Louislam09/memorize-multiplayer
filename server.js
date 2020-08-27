@@ -7,7 +7,7 @@ const PORT = process.env.PORT || 3000;
 app.use(express.static(path.join(__dirname,'public' )));
 
 // Start My Server
-server.listen(PORT, ()=> console.log(`Server running in port ${PORT}`) );
+server.listen(PORT, () => console.log(`Server running in port ${PORT}`));
 
 const socket = require('socket.io');
 
@@ -35,10 +35,6 @@ let room = 'game';
 const connections = [null, null];
 let playAgainConfirmations = [null, null];
 
-function playAgain(playAgainConfirmations){
-
-}
-
 function onConnect(socket){
     let playerIndex = -1;
     
@@ -55,7 +51,7 @@ function onConnect(socket){
         room1[playerIndex] = { userName: name , num: playerIndex };
 
         socket.to(room).broadcast.emit('oponent-connected', {
-            message: 'Tu oponente sea conectado :)'
+            message: 'Tu Oponente Sea Conectado :)'
         });
 
         io.emit('players-info', [...room1]);
@@ -75,7 +71,6 @@ function onConnect(socket){
                 break
             }
         }
-      
         
         if(playAgainConfirmations.every(res => res === true)){
             colors1 = colors.sort(() => 0.5 - Math.random());
@@ -92,15 +87,13 @@ function onConnect(socket){
         if(playAgainConfirmations[0]){
             socket.to(room).broadcast.emit('acept-match', alertName);
         }
-
-
     });
 
     socket.on('disconnect', _ =>{
         console.log(`Player ${playerIndex} has  disconnected`);
 
         socket.to(room).broadcast.emit('oponent-disconneted', {
-            message: 'Tu oponente sea desconectado :('
+            message: 'Tu Oponente Sea Desconectado :('
         });
 
         connections[playerIndex] = null;

@@ -17,6 +17,7 @@ body {
 
 body {
   background: var(--dark-mode);
+  background-attachment: fixed;
 }
 .game__end{
   display: flex;
