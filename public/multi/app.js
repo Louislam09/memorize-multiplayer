@@ -8,6 +8,12 @@ let gameEnd = document.querySelector('.game__end');
 let playAgainButton = gameEnd.querySelector('.play__again__button');
 let backHomeButton = gameEnd.querySelector('.back__home');
 let winnerDiv = gameEnd.querySelector('h1');
+let toggleChat = document.querySelector('.toggle-chat');
+let countMessageDiv = toggleChat.querySelector('.count-message');
+let chatSection = document.querySelector('.chat-section');
+let chatContent = document.querySelector('.chat-content');
+let chatTextValue = document.querySelector('.chat-text');
+let chatSendButton = document.querySelector('.send-message-button');
 
 // const socket = io.connect('http://192.168.43.10:3000/');
 const socket = io();
@@ -32,7 +38,7 @@ let userName = prompt('Escribe Tu Nombre: ');
 let playAgainMessage = false;
 
 let enemyName;
-
+let countMessage = 0;
 let userPoint = 0,
   enemyPoint = 0;
 
@@ -42,12 +48,15 @@ let currectPlayer = '';
 let playerNumber = 0;
 
 let waitingOponentTime;
+let chatScreen = false;
+
+let notificationSound = new Audio('sound/notification.mp3');
 
 socket.emit('user-name', userName);
 
 socket.on('players-info', informations => {
   for(const i in informations){
-    if(informations[i].num === -1){
+    if(informations[i].num === '-1'){
       isTurnDiv.innerText = 'Sorry, The Server Is Full';
 
     } else {
@@ -109,11 +118,17 @@ function createBoard(data){
     cards.forEach((card) => {
         card.addEventListener("click", cardClicked);
     });
+    hideElement(chatSection);
+
 }
 
 function cardClicked(event) {
   if(myTurn){
     let elementClicked = event.target;
+    elementClicked.classList.add('flip');
+
+    setTimeout(() =>{
+      elementClicked.classList.remove('flip');
 
     if(elementClicked.classList.contains('hide')){
       elementClicked.classList.remove("hide");
@@ -135,6 +150,7 @@ function cardClicked(event) {
       alert('Esta Carta Ya Esta Revelada!\n Presione Otra!')
       return;
     }
+  },500)
 
   } else {
     isTurnDiv.innerText = `No es tu turno!`;
@@ -160,7 +176,14 @@ function areEqual(array) {
     setPoint();
   } else {
     setTimeout(() => {
-        array.forEach((card) => card.classList.add("hide"));
+      array.forEach((card) => {
+          card.classList.add("flip");
+          setTimeout(() =>{
+            card.classList.remove('flip');
+            card.classList.add("hide");
+          },500);
+        });
+
         cardsToVerify = [];
         cardsToSent = [];
         swapTurn();
@@ -240,6 +263,14 @@ function playAgain(){
   showElement(gameEnd);
 }
 
+function makeMessage(messageText,whoSent){
+  let message = document.createElement('div');
+  message.classList.add('chat-content__message');
+  message.innerText = messageText;
+  message.classList.add(whoSent);
+  chatContent.appendChild(message);
+}
+
 function showElement(element,v = false) {
   if(element === container){
     element.style.display = "";
@@ -263,6 +294,11 @@ function hideElement(element,v = false) {
     element.style.display = "none";
 }
 
+function playSound(sound){
+  sound.currentTime  = 0;
+  sound.play();
+}
+
 socket.on('clicked', (data) =>{
     cardsToSent = data;
 
@@ -275,17 +311,6 @@ socket.on('clicked', (data) =>{
         cardsToSent[1] = cards[data[1]];
         areEqual(cardsToSent);
     } 
-})
-
-playAgainButton.addEventListener('click', () => {
-  winnerDiv.innerText = `Esperando tu oponente...`;
-  socket.emit('play-again-confirmation',{
-    data: true,
-    alertName: userName
-  })
-
-  hideElement(playAgainButton,true);
-
 })
 
 socket.on('acept-match', data => {
@@ -303,8 +328,52 @@ socket.on('oponent-connected', data => {
   alert( message );
 });
 
+socket.on('oponent-message',({message})=>{
+  if(!chatScreen) {
+    countMessage++;
+    countMessageDiv.innerText = countMessage;
+    showElement(countMessageDiv);
+  }
+  
+  makeMessage(message,'player2');
+  playSound(notificationSound);
+})
+
+playAgainButton.addEventListener('click', () => {
+  winnerDiv.innerText = `Esperando tu oponente...`;
+  socket.emit('play-again-confirmation',{
+    data: true,
+    alertName: userName
+  })
+
+  hideElement(playAgainButton,true);
+
+})
+
 backHomeButton.addEventListener('click',()=>{
   let origin = window.location.origin;
   window.open(`${origin}`,'_parent');
+});
+
+toggleChat.addEventListener('click',() => {
+  if(chatScreen){
+    hideElement(chatSection);
+    chatScreen = !chatScreen;
+  }else{
+    chatScreen = !chatScreen;
+    showElement(chatSection);
+    hideElement(countMessageDiv);
+    countMessage = 0;
+  }
 })
 
+chatSendButton.addEventListener('click',() => {
+  let message = chatTextValue.value;
+  if(message.trim() === '') return;
+
+  makeMessage(message,'player1');
+  socket.emit('oponent-message', {
+    message: message
+  })
+  chatTextValue.value = '';
+})

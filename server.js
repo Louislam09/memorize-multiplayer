@@ -38,33 +38,32 @@ let playAgainConfirmations = [null, null];
 function onConnect(socket){
     let playerIndex = -1;
     
-    switchRoom(socket,room);
-
     socket.on('user-name', name => {
         for(const i in connections){
             if(connections[i] === null){
                 playerIndex = i;
+                connections[i] = i;
+                switchRoom(socket,room);
                 break
             }
         }
+
+        // If there is a player 3, ignore it.
+        if(playerIndex === -1) return;
         
         room1[playerIndex] = { userName: name , num: playerIndex };
-
+        
         socket.to(room).broadcast.emit('oponent-connected', {
             message: 'Tu Oponente Sea Conectado :)'
         });
 
         io.emit('players-info', [...room1]);
-      
-        // If there is a player 3, ignore it.
-        if(playerIndex === -1) return;
-      
         console.log(`Player ${playerIndex} has connected`);
-    
-        connections[playerIndex] = false;
+        // connections[playerIndex] = false;
     });
 
     socket.on('play-again-confirmation', data => {
+        if(playerIndex === -1) return;
         for(const i in playAgainConfirmations){
             if(playAgainConfirmations[i] === null){
                 playAgainConfirmations[i] = true;
@@ -92,11 +91,15 @@ function onConnect(socket){
     socket.on('disconnect', _ =>{
         console.log(`Player ${playerIndex} has  disconnected`);
 
+        if(playerIndex === -1) return;
         socket.to(room).broadcast.emit('oponent-disconneted', {
             message: 'Tu Oponente Sea Desconectado :('
         });
 
-        connections[playerIndex] = null;
+        if(playerIndex !== -1 ){
+            connections[playerIndex] = null;
+        }
+
         playAgainConfirmations[playerIndex] = null;
 
     })
@@ -113,7 +116,11 @@ function onConnect(socket){
     socket.on('canClick', ({canClick}) => {
 		socket.to(room).broadcast.emit('canNotClick', canClick);
     });
-
+    
+    socket.on('oponent-message', data => {
+        if(playerIndex === -1) return;
+        socket.to(room).broadcast.emit('oponent-message', data);
+    })
 }
 
 function switchRoom(socket,roomName){

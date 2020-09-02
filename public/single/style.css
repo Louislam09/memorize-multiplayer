@@ -190,6 +190,22 @@
     height: var(--card-height);
     border: 1px solid white;
   }
+
+  .flip{
+    animation: flip .4s ease-in-out 1;
+  }
+
+  @keyframes flip{
+    0%{
+      transform: rotateY(0deg) scale(1);
+
+    }
+    100%{
+      transform: rotateY(90deg) scale(1.5);
+
+    }
+  }
+
   
   .card:hover {
     border: 2px solid blue;

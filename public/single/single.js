@@ -36,7 +36,7 @@ let enemyName = 'Computadora';
 let userPoint = 0,
   enemyPoint = 0;
 
-let myTurn = false;
+let myTurn = true;
 let computerCardToOpen = 0;
 let computerTempCard;
 
@@ -90,19 +90,24 @@ function cardClicked(event) {
     if(myTurn){
     let elementClicked = event.target;
     computerTempCard = elementClicked;
-    if( elementClicked.classList.contains('hide') ){
-        elementClicked.classList.remove("hide");
-        cardsToVerify.push(elementClicked);
-        cardsToSent.push(elementClicked.id);
+    elementClicked.classList.add('flip');
 
-        if (cardsToVerify.length === 2) {
-            areEqual(cardsToVerify);
-        }
-
-    } else {
-        alert('Esta Carta Ya Esta Revelada!\n Presione Otra!');
-        return;
-    }
+    setTimeout(() =>{
+      elementClicked.classList.remove('flip');
+      if( elementClicked.classList.contains('hide') ){
+          elementClicked.classList.remove("hide");
+          cardsToVerify.push(elementClicked);
+          cardsToSent.push(elementClicked.id);
+  
+          if (cardsToVerify.length === 2) {
+              areEqual(cardsToVerify);
+          }
+  
+      } else {
+          alert('Esta Carta Ya Esta Revelada!\n Presione Otra!');
+          return;
+      }
+    },500)
 
     } else {
         isTurnDiv.innerText = `No es tu turno!`;
@@ -118,8 +123,8 @@ function cardClicked(event) {
             }
 
         },2000)
-    }   
-
+    
+  }   
 }
 
 function compuCardClicked(){
@@ -158,7 +163,13 @@ function areEqual(array) {
     setPoint();
   } else {
     setTimeout(() => {
-        array.forEach((card) => card.classList.add("hide"));
+        cardsToVerify.forEach((card) => {
+            card.classList.add("flip");
+            setTimeout(() =>{
+              card.classList.remove('flip')
+              card.classList.add("hide");
+            },500);
+        });
         cardsToVerify = [];
         cardsToSent = [];
         swapTurn();
