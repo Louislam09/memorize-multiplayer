@@ -15,7 +15,6 @@ let chatContent = document.querySelector('.chat-content');
 let chatTextValue = document.querySelector('.chat-text');
 let chatSendButton = document.querySelector('.send-message-button');
 
-// const socket = io.connect('http://192.168.43.10:3000/');
 const socket = io();
 
 let colors = [
@@ -30,56 +29,52 @@ let colors = [
 ];
 
 const numberOfCard = 16;
-let cards = [];
-let cardsToVerify = [];
-let cardsToSent = [];
 
-let userName = prompt('Escribe Tu Nombre: ');
-let playAgainMessage = false;
+let cards = [],
+cardsToVerify = [],
+cardsToSent = [];
 
-let enemyName;
-let countMessage = 0;
-let userPoint = 0,
-  enemyPoint = 0;
+let myName = prompt('Escribe Tu Nombre: '),
+  enemyName,
+  countMessage = 0,
+  userPoint = 0,
+  enemyPoint = 0,
+  currectPlayer = '',
+  playerNumber = 0;
 
-let myTurn = false;
-
-let currectPlayer = '';
-let playerNumber = 0;
-
-let waitingOponentTime;
-let chatScreen = false;
-
+let waitingOponentTime,
+  myTurn = false,
+  isChatOpen = false;
+  
 let notificationSound = new Audio('sound/notification.mp3');
 
-socket.emit('user-name', userName);
 
-socket.on('players-info', informations => {
-  for(const i in informations){
-    if(informations[i].num === '-1'){
+socket.emit('user-name', myName);
+
+socket.on('players-info', playerInformations => {
+  for(const i in playerInformations){
+    if(playerInformations[i].num === '-1'){
       isTurnDiv.innerText = 'Sorry, The Server Is Full';
 
     } else {
-      playerNumber = parseInt(informations[i].num);
+      playerNumber = parseInt(playerInformations[i].num);
       
-      if(informations[playerNumber].userName !== userName){
-        enemyName = informations[playerNumber].userName;
+      if(playerInformations[playerNumber].userName !== myName){
+        enemyName = playerInformations[playerNumber].userName;
         break;
       }
 
-      if(playerNumber === 0 && informations[playerNumber].userName === userName){
+      if(playerNumber === 0 && playerInformations[playerNumber].userName === myName){
         myTurn = true;
       }
     }
   }
 
-  if(userName !== undefined && enemyName !== undefined) isTurn();
-  console.log(`UserName: ${userName}  enemyName: ${enemyName}`)
+  if(myName !== undefined && enemyName !== undefined) isTurn();
 });
 
-socket.on('colors', data => {
-  createBoard(data);
-
+socket.on('colors', cardsFromServer => {
+  createBoard(cardsFromServer);
 })
 
 function resetGame() {
@@ -93,33 +88,27 @@ function resetGame() {
   
   userPoint = 0;
   enemyPoint = 0;
-  player1Div.innerText = `${userName}: ${userPoint}`;
+  player1Div.innerText = `${myName}: ${userPoint}`;
   player2Div.innerText = `${enemyName}: ${enemyPoint}`;
 
   isTurn();
 }
 
-function createBoard(data){
+function createBoard(cardsName){
   resetGame();
-  const { colors1, colors2 } = data;
+  const { cardsName1, cardsName2 } = cardsName;
   for (let i = 0; i < numberOfCard; i++) {
     let card = document.createElement("div");
-    card.classList.add("card");
     card.id = i;
-    if (i <= 7) card.classList.add(colors1[i]);
-
-    if (i > 7) card.classList.add(colors2[i - 8]);
+    card.classList.add("card");
+    if (i <= 7) card.classList.add(cardsName1[i]);
+    if (i > 7) card.classList.add(cardsName2[i - 8]);
     card.classList.add("hide");
-
+    card.addEventListener("click", cardClicked);
     cards.push(card);
     gameScreen.appendChild(card);
   }
-
-    cards.forEach((card) => {
-        card.addEventListener("click", cardClicked);
-    });
-    hideElement(chatSection);
-
+  hideElement(chatSection);
 }
 
 function cardClicked(event) {
@@ -131,6 +120,7 @@ function cardClicked(event) {
       elementClicked.classList.remove('flip');
 
     if(elementClicked.classList.contains('hide')){
+
       elementClicked.classList.remove("hide");
       cardsToVerify.push(elementClicked);
       cardsToSent.push(elementClicked.id);
@@ -139,13 +129,9 @@ function cardClicked(event) {
         cardsToSent: cardsToSent
       });
     
-      if (cardsToVerify.length == 2) {
+      if (cardsToVerify.length === 2) {
           areEqual(cardsToVerify);
       }
-      
-      socket.emit('canClick', { 
-        canClick: false
-       } );
     } else {
       alert('Esta Carta Ya Esta Revelada!\n Presione Otra!')
       return;
@@ -155,18 +141,15 @@ function cardClicked(event) {
   } else {
     isTurnDiv.innerText = `No es tu turno!`;
     isTurnDiv.classList.add('not-turn');
-
-    setTimeout(()=>{
+    setTimeout(() => {
       isTurnDiv.classList.remove('not-turn')
       if(myTurn) {
-        isTurnDiv.innerText = `Es turno de : ${userName}`;
-      }else{
+        isTurnDiv.innerText = `Es turno de : ${myName}`;
+      } else {
         isTurnDiv.innerText = `Es turno de : ${enemyName}`;
       }
     },2000)
-
   }
-  
 }
 
 function areEqual(array) {
@@ -195,14 +178,14 @@ function areEqual(array) {
     isTurnDiv.classList.add('win');
     
     if (userPoint > enemyPoint) {
-        isTurnDiv.innerText = `El Ganador es: ${userName}`;
-        winnerDiv.innerText = `El Ganador es: ${userName}`;
-      }else if (userPoint < enemyPoint) {
-        isTurnDiv.innerText = `El Ganador es: ${enemyName}`;
-        winnerDiv.innerText = `El Ganador es: ${enemyName}`;
-      }else {
-        isTurnDiv.innerText = `Empate!`;
-        winnerDiv.innerText = `Empate!`;
+      isTurnDiv.innerText = `El Ganador es: ${myName}`;
+      winnerDiv.innerText = `El Ganador es: ${myName}`;
+    }else if (userPoint < enemyPoint) {
+      isTurnDiv.innerText = `El Ganador es: ${enemyName}`;
+      winnerDiv.innerText = `El Ganador es: ${enemyName}`;
+    }else {
+      isTurnDiv.innerText = `Empate!`;
+      winnerDiv.innerText = `Empate!`;
     }
 
     playAgain();
@@ -220,8 +203,8 @@ function swapTurn() {
 function isTurn() {
   if (myTurn) {
     clearInterval(waitingOponentTime)
-    isTurnDiv.innerText = `Es turno de : ${userName}`;
-    currectPlayer = userName;
+    isTurnDiv.innerText = `Es turno de : ${myName}`;
+    currectPlayer = myName;
   } else {
     clearInterval(waitingOponentTime)
     isTurnDiv.innerText = `Es turno de : ${enemyName}`;
@@ -253,7 +236,7 @@ function setPoint() {
     enemyPoint++;
   }
 
-  player1Div.innerText = `${userName}: ${userPoint}`;
+  player1Div.innerText = `${myName}: ${userPoint}`;
   player2Div.innerText = `${enemyName}: ${enemyPoint}`;
 }
 
@@ -269,26 +252,22 @@ function makeMessage(messageText,whoSent){
   message.innerText = messageText;
   message.classList.add(whoSent);
   chatContent.appendChild(message);
+  chatContent.scrollTop = chatContent.scrollHeight;
 }
 
-function showElement(element,v = false) {
+function showElement(element,visibily = false) {
   if(element === container){
     element.style.display = "";
     return;
   }
 
-  if(v){
-    element.style.visibily= "visible";
-
-  }
+  if(visibily) element.style.visibily= "visible";
 
   element.style.display = "flex";
-
 }
 
-function hideElement(element,v = false) {
-  
-  if(v){
+function hideElement(element,visibily = false) {
+  if(visibily){
     element.style.visibily= "hidden";
   }
     element.style.display = "none";
@@ -301,10 +280,7 @@ function playSound(sound){
 
 socket.on('clicked', (data) =>{
     cardsToSent = data;
-
-    data.forEach(id=>{
-        cards[id].classList.remove('hide');
-    })
+    data.forEach(id => cards[id].classList.remove('hide'));
 
     if(cardsToSent.length === 2){
         cardsToSent[0] = cards[data[0]];
@@ -329,7 +305,7 @@ socket.on('oponent-connected', data => {
 });
 
 socket.on('oponent-message',({message})=>{
-  if(!chatScreen) {
+  if(!isChatOpen) {
     countMessage++;
     countMessageDiv.innerText = countMessage;
     showElement(countMessageDiv);
@@ -343,24 +319,22 @@ playAgainButton.addEventListener('click', () => {
   winnerDiv.innerText = `Esperando tu oponente...`;
   socket.emit('play-again-confirmation',{
     data: true,
-    alertName: userName
-  })
-
+    alertName: myName
+  });
   hideElement(playAgainButton,true);
+});
 
-})
-
-backHomeButton.addEventListener('click',()=>{
+backHomeButton.addEventListener('click', () => {
   let origin = window.location.origin;
   window.open(`${origin}`,'_parent');
 });
 
 toggleChat.addEventListener('click',() => {
-  if(chatScreen){
+  if(isChatOpen){
     hideElement(chatSection);
-    chatScreen = !chatScreen;
-  }else{
-    chatScreen = !chatScreen;
+    isChatOpen = !isChatOpen;
+  } else {
+    isChatOpen = !isChatOpen;
     showElement(chatSection);
     hideElement(countMessageDiv);
     countMessage = 0;
@@ -370,10 +344,9 @@ toggleChat.addEventListener('click',() => {
 chatSendButton.addEventListener('click',() => {
   let message = chatTextValue.value;
   if(message.trim() === '') return;
-
   makeMessage(message,'player1');
   socket.emit('oponent-message', {
     message: message
-  })
+  });
   chatTextValue.value = '';
 })

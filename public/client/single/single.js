@@ -129,7 +129,7 @@ function cardClicked(event) {
 
 function compuCardClicked(){
     let chooseCard;
-    if(Math.random() < 0.4 && cardsToVerify[0]){
+    if(Math.random() < 0.33 && cardsToVerify[0]){
         let cardEqual = cards.filter( card => 
             card.classList[1] === computerTempCard.classList[1] &&
             card.id !== computerTempCard.id

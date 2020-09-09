@@ -1,13 +1,12 @@
 {
   "name": "multiplayer-game",
   "version": "1.0.0",
-  "description": "",
+  "description": "This a multiplayer memorize game",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
   },
-  "author": "",
+  "author": "Luis Martinez",
   "license": "ISC",
   "dependencies": {
     "express": "^4.17.1",

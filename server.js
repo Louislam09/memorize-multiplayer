@@ -76,8 +76,8 @@ function onConnect(socket){
             colors2 = [...colors].sort(() => 0.5 - Math.random());
             
             io.emit('colors', {
-                colors1: colors1,
-                colors2: colors2
+                cardsName1: colors1,
+                cardsName2: colors2
             });
             playAgainConfirmations = [null, null];
         }
@@ -101,20 +101,15 @@ function onConnect(socket){
         }
 
         playAgainConfirmations[playerIndex] = null;
-
     })
 
     socket.emit('colors', {
-        colors1: colors1,
-        colors2: colors2
+        cardsName1: colors1,
+        cardsName2: colors2
     });
 
     socket.on('cardClicked', ({cardsToSent}) => {
 		socket.to(room).broadcast.emit('clicked', cardsToSent);
-    });
-
-    socket.on('canClick', ({canClick}) => {
-		socket.to(room).broadcast.emit('canNotClick', canClick);
     });
     
     socket.on('oponent-message', data => {
