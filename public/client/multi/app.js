@@ -320,7 +320,6 @@ async function shareCode(code){
     text: 'Share Code Room To Friend',
     url: cc,
   }
-  
   try {
     await navigator.share(shareData)
   } catch(err) {
