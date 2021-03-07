@@ -8,13 +8,21 @@
     <link href="https://fonts.googleapis.com/css2?family=Bangers&display=swap" rel="stylesheet">
     <link rel="manifest" href="./manifest.webmanifest">
     <link rel="stylesheet" href="lobby.css">
+    <script src="home.js" defer></script>    
 </head>
 <body>
     <h1>Memorize</h1>
 
     <div class="container">
-        <a href="./client/multi/multiplayer.html" target="_parent" rel="noopener noreferrer">Multiplayer</a>
-        <a href="./client/single/single.html" target="_parent" rel="noopener noreferrer">You vs PC</a>
+        <div class="buttons">
+            <a href="./client/multi" target="_parent" rel="noopener noreferrer" class="multiplayer__button">Multiplayer</a>
+            <a href="./client/single/single.html" target="_parent" rel="noopener noreferrer">You vs PC</a>
+        </div>
+
+        <div class="code__field">
+            <input type="text" class="code__input" placeholder="Join With Code Here">
+            <button class="join__button">Join</button>
+        </div>
     </div>
     <img class="brain-img" src="./image/brain.png" alt="brain" >
     <span class="autor">Made with ❤️ by Lam09 </span>

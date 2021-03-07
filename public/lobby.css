@@ -1,4 +1,3 @@
-
 html,body{
     /* height: 100%; */
 }
@@ -17,11 +16,13 @@ h1{
 
 .container {
     display: flex;
+    flex-direction: column;
     padding: 25px;
     width: fit-content;
     margin: 10px 15%;
     height: fit-content;
 }
+
 
 .container a {
     color: white;
@@ -35,15 +36,67 @@ h1{
     box-shadow: 0px 0px 10px white;
     text-shadow: -1px -2px 15px black;
     width: 100%;
-    transition: background 1s;
+    transition: all 1s;
 }
+
+.buttons{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.code__field{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 40px;
+    margin-top: 2rem;
+}
+
+.code__field input{
+    flex: .7;
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+    border: 2px solid #2cdac3c2;
+    background: #2cdac363;   
+    text-align: center;
+    font-size: 1.2rem;
+    color: white;
+    box-shadow: 0px 0px 10px white;
+    border: 1px solid white;
+}
+
+.code__input:focus{
+    border: none;
+}
+
+.code__field input::placeholder{
+    color: #ffffffe3;
+}
+
+.code__field button{
+    flex: .3;
+    width: 100%;
+    border: 2px solid white;
+    background: #2cdac3c2;   
+    color: white;
+    text-decoration: none;
+    font-size: 2rem;
+    padding: 5px;
+    margin: 10px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px white;
+    text-shadow: -1px -2px 15px black;
+}
+
 a:hover{
     background: #2cdac380;
     transform: translateX(10px);
 }
 
 .autor {
-	position: fixed;
+	position: absolute;
 	bottom: 1%;
 	right: 1%;
 	background-color: rgba(255, 0, 21, 0.678);
@@ -65,16 +118,27 @@ a:hover{
         zoom: 60%;
     }    
     .container{
-        margin: 10px 0%;
+        width: 100%;
+        height: 100vh;
+        margin: 0;
+        padding: 0 5px;
+    }
+
+    .brain-img{
+        position: absolute;
+        top: 75%;
+        left: 50%;
+        transform: translate(-50%,-50%);
+        width: 420px;
+        z-index: -1;
     }
 }
 
 @media only screen and (min-width: 450px) and (max-width: 1023px) {
     body{
-            zoom: 80%;
-        }
-        .container{
-            margin: 10px 5%;
-        }
-    
-  }
+        zoom: 80%;
+    }
+    .container{
+        margin: 10px 5%;
+    }
+}

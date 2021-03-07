@@ -1,5 +1,7 @@
 * {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 :root {
@@ -252,12 +254,14 @@ body {
   position: absolute;
   left: 0%;
   width: 30%;
-  height: 90%;
+  height: 75%;
   border: 2px solid white;
   border-radius: 15px;
   padding: 10px auto;
   background: #0c0435;
+  bottom: 0;
 }
+
 
 .chat-content{
   position: relative;
@@ -321,33 +325,59 @@ body {
   color: #0400ff;
 }
 
-.toggle-chat{
-  position: relative;
-  width: max-content;
-  margin-bottom: 30px;
+
+.side__nav{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  width: fit-content;
+  padding: 15px;
 }
 
-.toggle-chat::after{
-  position: absolute;
-  content: 'Chat';
+.side__nav > div{
+  margin: 10px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.toggle-chat,.share-icon{
+  position: relative;
+  width: max-content;
+}
+
+.toggle-bar{
+  position: relative;
+  margin: 10px 15px;
+}
+
+.share-icon i, .toggle-bar i{
+  font-size:46px;
+  color:white;
+  margin-bottom: 5px;
+}
+
+.label{
   color: white;
-  top: 100%;
-  left: 0%;
   font-size: 2em;
 }
 
 .toggle-chat .count-message{
   position: absolute;
   z-index: 999;
-  top: -10%;
-  left: -9%;
+  top: 25%;
+  left: 94%;
+  min-height: 10px;
   color: white;
   border: 1px solid white;
-  border-radius: 50px;
+  border-radius: 50%;
   background: red;
-  padding: 2px;
-  font-size: 20px;
+  padding: 0 3px;
+  font-size: 10px;
   font-weight: bold;
+  animation: floating 1s ease infinite;
 }
 
 .fa-wechat{
@@ -388,6 +418,8 @@ body {
   border-bottom-left-radius: 0%;
   margin-right: auto;
   background: #ffffff38;
+  background: #1ce6cb;
+  border-color: white;
 }
 
 .chat-content__message.player1::first-letter,
@@ -440,6 +472,18 @@ body {
 .hide {
   background: url(images/question.png)  ;
   background-size: cover;
+}
+
+.hide-side-nav{
+  display: none;
+}
+
+.hide-share{
+  display: none !important;
+}
+
+.close-bar > i::before{
+  content: "\f0c9";
 }
 
 @media only screen and (min-width: 320px) and (max-width:  450px){

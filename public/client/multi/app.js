@@ -14,6 +14,9 @@ let chatSection = document.querySelector('.chat-section');
 let chatContent = document.querySelector('.chat-content');
 let chatTextValue = document.querySelector('.chat-text');
 let chatSendButton = document.querySelector('.send-message-button');
+let shareCodeIcon = document.querySelector('.share-icon');
+let toggleBarMenuIcon = document.querySelector('.toggle-bar');
+let sideNavDiv = document.querySelector('.side__nav');
 
 const socket = io();
 
@@ -40,7 +43,8 @@ let myName = prompt('Escribe Tu Nombre: '),
   userPoint = 0,
   enemyPoint = 0,
   currectPlayer = '',
-  playerNumber = 0;
+  playerNumber = 0,
+  ROOM_NAME = "default";
 
 let waitingOponentTime,
   myTurn = false,
@@ -48,8 +52,39 @@ let waitingOponentTime,
   
 let notificationSound = new Audio('sound/notification.mp3');
 
+// socket.emit('get-code', true);
 
-socket.emit('user-name', myName);
+if(window.location.search){
+  let code = window.location.search.split("?")[1];
+  ROOM_NAME = code;
+  socket.emit('get-code', {hasCode: true, code: code});
+
+  shareCodeIcon.classList.add("hide-share");
+
+  socket.emit('user-name', {
+    name: myName,
+    roomName: ROOM_NAME
+  });
+  
+}else{
+  socket.emit('get-code', {hasCode: false, code: ""});
+}
+
+socket.on('code', ({code}) => {
+  ROOM_NAME = code;
+   
+  console.log(code)
+
+  socket.emit('user-name', {
+    name: myName,
+    roomName: ROOM_NAME
+  });
+});
+
+// socket.emit('user-name', {
+//   name: myName,
+//   roomName: ROOM_NAME
+// });
 
 socket.on('players-info', playerInformations => {
   for(const i in playerInformations){
@@ -58,7 +93,6 @@ socket.on('players-info', playerInformations => {
 
     } else {
       playerNumber = parseInt(playerInformations[i].num);
-      
       if(playerInformations[playerNumber].userName !== myName){
         enemyName = playerInformations[playerNumber].userName;
         break;
@@ -126,11 +160,12 @@ function cardClicked(event) {
       cardsToSent.push(elementClicked.id);
     
       socket.emit('cardClicked', {
-        cardsToSent: cardsToSent
+        cardsToSent: cardsToSent,
+        roomName: ROOM_NAME
       });
     
       if (cardsToVerify.length === 2) {
-          areEqual(cardsToVerify);
+        areEqual(cardsToVerify);
       }
     } else {
       alert('Esta Carta Ya Esta Revelada!\n Presione Otra!')
@@ -278,6 +313,24 @@ function playSound(sound){
   sound.play();
 }
 
+async function shareCode(code){
+  let cc = "?"+code;
+  const shareData = {
+    title: 'Memorize Game',
+    text: 'Share Code Room To Friend',
+    url: cc,
+  }
+  
+  try {
+    await navigator.share(shareData)
+  } catch(err) {
+    alert("No se pudo compartir")
+  }
+}
+
+shareCodeIcon.addEventListener('click',  () => shareCode(ROOM_NAME))
+
+
 socket.on('clicked', (data) =>{
     cardsToSent = data;
     data.forEach(id => cards[id].classList.remove('hide'));
@@ -304,7 +357,7 @@ socket.on('oponent-connected', data => {
   alert( message );
 });
 
-socket.on('oponent-message',({message})=>{
+socket.on('oponent-message',(message)=>{
   if(!isChatOpen) {
     countMessage++;
     countMessageDiv.innerText = countMessage;
@@ -315,11 +368,16 @@ socket.on('oponent-message',({message})=>{
   playSound(notificationSound);
 })
 
+socket.on("msg", data => {
+  console.log(data)
+})
+
 playAgainButton.addEventListener('click', () => {
   winnerDiv.innerText = `Esperando tu oponente...`;
   socket.emit('play-again-confirmation',{
     data: true,
-    alertName: myName
+    alertName: myName,
+    roomName: ROOM_NAME
   });
   hideElement(playAgainButton,true);
 });
@@ -346,7 +404,14 @@ chatSendButton.addEventListener('click',() => {
   if(message.trim() === '') return;
   makeMessage(message,'player1');
   socket.emit('oponent-message', {
-    message: message
+    message: message,
+    roomName: ROOM_NAME
   });
   chatTextValue.value = '';
+})
+
+
+toggleBarMenuIcon.addEventListener("click", ()=>{
+  sideNavDiv.classList.toggle("hide-side-nav");
+  toggleBarMenuIcon.classList.toggle("close-bar");
 })
