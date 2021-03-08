@@ -317,7 +317,7 @@ async function shareCode(code){
   let cc = "?"+code;
   const shareData = {
     title: 'Memorize Game',
-    text: 'Share Code Room To Friend',
+    text: 'Unete A Jugar Con Este Link',
     url: cc,
   }
   try {
