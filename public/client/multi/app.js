@@ -329,7 +329,6 @@ async function shareCode(code){
 
 shareCodeIcon.addEventListener('click',  () => shareCode(ROOM_NAME))
 
-
 socket.on('clicked', (data) =>{
     cardsToSent = data;
     data.forEach(id => cards[id].classList.remove('hide'));
